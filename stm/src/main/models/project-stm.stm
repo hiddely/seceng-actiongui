@@ -10,40 +10,101 @@ role FREEUSER{
         update(name), update(surname), update(password) constrainedBy [self = caller]
 
         //4
-        add(subscriptions) constrainedBy [self = caller and 
-                                            self.subscriptions->size() < 3]
+        //add(subscriptions) constrainedBy [self = caller and 
+        //                                    self.subscriptions->size() < 3]
 
         //5 (it may not be complete)
-        remove(subscriptions) constrainedBy [self = caller]
+        //remove(subscriptions) constrainedBy [self = caller]
 
         //6
-        read(attends)
+        read(attends) constrainedBy [self = caller]
+
+        //7
+        remove(attends) constrainedBy [self = caller
+                                        and (not self.events->includes(target))]
+
+        //8
+        read(invitations) constrainedBy [self = caller]
+
+        //9, 21
+        add(attends) constrainedBy [self = caller
+                                    and (self.invitations->any(v1|v1.event = target) <> null
+                                        or target.owner = caller)]
 
         //10
-        read(events)
+        read(events) constrainedBy [self = caller]
 
         //11
-        read(manages)
-        
+        read(manages) constrainedBy [self = caller]
+
+        //16, 17
+        add(requests), read(requests) constrainedBy [self = caller]
+
+        //21
+        add(events) constrainedBy [self = caller and target.owner = null]
+        add(manages) constrainedBy [self = caller and target.owner = caller]
         
     }
     Event{
         //12
-        read(title), read(description), read(location), read(time), read(date)
+        read(title), read(description), read(lat), read(lon), read(hour), read(min), read(date)
 
         //13
         read(owner), read(categories)
         
         //14
-        read(attendant) constrainedBy [self.attendants->includes(caller)]
+        read(attendants) constrainedBy [self.attendants->includes(caller)]
+
+        //15-1
+        read(invitations) constrainedBy [self.managedBy->includes(caller)]
+        //15-3
+        add(categories), remove(categories) constrainedBy [self.managedBy->includes(caller)]
+        //15-4
+        update(title), update(description),
+        update(lat), update(lon), update(hour),
+        update(min), update(date) constrainedBy [self.managedBy->includes(caller)]
+        //15-5
+        read(requesters), remove(requesters) constrainedBy [self.managedBy->includes(caller)]
+
+        //16
+        //add(requesters) constrainedBy [target = caller]
+
+        //21
+        create constrainedBy [caller.events->size() < 5]
+        update(owner) constrainedBy [self.owner = null and caller = value]
+
+        //(15-5), 22
+        add(attendants) constrainedBy [self.managedBy->includes(caller)
+                        and (self.owner.role <> Role::FREEUSER or (self.attendants->size() + self.invitations->size() < 4))]
     }
     Category{
         //4 (may not be necessary)
-        add(subscribers) constrainedBy [value = caller]
+        add(subscribers) constrainedBy [target = caller and
+                                        caller.subscriptions->size() < 3]
+
+        //5
+        remove(subscribers) constrainedBy [target = caller]
+
+        //18,19
+        read(name), read(events)
+
+        //20
+        read(subscribers), read(moderators) constrainedBy [self.subscribers->includes(caller)]
+
+        
     }
     Invite{
         //8
         read(event), read(invitedBy) constrainedBy [self.invitee = caller]
+
+        //9
+        delete constrainedBy [self.invitee = caller]
+
+        //15-2
+        create
+        update(event) constrainedBy [value.managedBy->includes(caller) and self.event = null]
+        update(invitedBy) constrainedBy [value = caller and self.invitedBy = null]
+        update(invitee) constrainedBy [self.invitedBy = caller and self.invitee = null]
     }
 }
 
