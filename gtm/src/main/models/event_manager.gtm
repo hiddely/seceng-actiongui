@@ -1,0 +1,135 @@
+Window EventManagerWindow{
+    Event entity
+   
+    Label Title_L {
+        String text:= ['Title']
+    }
+    TextField Title_TF {
+        String text:= [$EventManagerWindow.entity$.title]
+    }
+    Label Description_L {
+        String text:= ['Description']
+    }
+    TextField Description_TF {
+        String text:= [$EventManagerWindow.entity$.description]
+    }
+    Label Location_L {
+        String text:= ['Location (latitude and longitude)']
+    }
+    TextField Lat_TF {
+        String text:= [$EventManagerWindow.entity$.lat.toString()]
+
+    }
+    TextField Lon_TF {
+        String text:= [$EventManagerWindow.entity$.lon.toString()]
+
+    }
+    Label Date_L {
+        String text:= ['Date']
+    }
+    DateField Date_DF {
+        LocalDateTime value:= [$EventManagerWindow.entity$.date.atStartOfDay()]
+    }
+    Label Time_L {
+        String text:= ['Time (hours and minutes)']
+    }
+    TextField Hour_TF {
+        String text:= [$EventManagerWindow.entity$.hour.toString()]
+    }
+    TextField Minute_TF {
+        String text:= [$EventManagerWindow.entity$.min.toString()]
+    }
+    Label Category_L {
+        String text:= ['Category']
+    }
+    Table Table_Category_T{
+        Set(Category) rows := [Category.allInstances()]
+        Set(Category) selected  := [$EventManagerWindow.entity$.categories]
+        String error:= [null]
+        columns {
+            ['Name'] : Label name {
+                event onView (text){
+                    try{
+                        text := [$Table_Category_T.row$.name]
+                    } catch (SecurityException){
+                        text := ['RESTRICTED']
+                    }
+                }
+           }
+        }
+    }
+    Button Update_B{
+        Event newEvent
+        String text := ['Update']
+        event onClick{
+            if [(not $Title_TF.text$.oclIsUndefined()) and 
+                (not ($Title_TF.text$.size()=0)) and
+                (not $Description_TF.text$.oclIsUndefined()) and
+                (not ($Description_TF.text$.size()=0)) and
+                (not $Lat_TF.text$.oclIsUndefined()) and
+                (not ($Lat_TF.text$.size()=0)) and
+                (not $Lat_TF.text$.toReal().oclIsInvalid()) and
+                (not $Lon_TF.text$.oclIsUndefined()) and
+                (not ($Lon_TF.text$.size()=0)) and
+                (not $Lon_TF.text$.toReal().oclIsInvalid()) and
+                (not $Date_DF.value$.oclIsUndefined()) and 
+                (not $Hour_TF.text$.oclIsUndefined()) and
+                (not ($Hour_TF.text$.size()=0)) and
+                (not $Hour_TF.text$.toInteger().oclIsInvalid()) and
+                (not $Minute_TF.text$.oclIsUndefined()) and
+                (not ($Minute_TF.text$.size()=0)) and
+                (not $Minute_TF.text$.toInteger().oclIsInvalid()) and 
+                (not $Table_Category_T.selected$->oclIsUndefined())  and
+                (not ($Table_Category_T.selected$->size() < 1))]{
+                try{
+                    
+                        newEvent := [$EventManagerWindow.entity$]
+                        
+                        [$newEvent$.title]:=[$Title_TF.text$]
+                        [$newEvent$.description]:=[$Description_TF.text$]
+                        [$newEvent$.lat]:=[$Lat_TF.text$.toReal()]
+                        [$newEvent$.lon]:=[$Lon_TF.text$.toReal()]
+                        [$newEvent$.date]:=[$Date_DF.value$.toLocalDate().plusDays(1)]
+                        [$newEvent$.hour]:=[$Hour_TF.text$.toInteger()]
+                        [$newEvent$.min]:=[$Minute_TF.text$.toInteger()]                        
+
+                        foreach cat1 in [$newEvent$.categories]{
+                            [$newEvent$.categories]-=[$cat1$]
+                        }
+                        foreach cat2 in [$Table_Category_T.selected$]{
+                            [$newEvent$.categories]+=[$cat2$]
+                        }
+                        
+                        notification(['Success'],['Event updated'],[500])
+                        
+
+                   
+                } catch (SecurityException) {
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Form contains errors.'],[500])
+            }
+            
+        }
+    }    
+    
+    Button Manage_B {
+        String text:= ['Manage Event']
+        Set(Person) probe
+        event onClick {
+            if [$EventManagerWindow.caller$.manages->includes($EventManagerWindow.entity$)]{
+                open ManageEventWindow(caller:[$EventManagerWindow.caller$], role:[$EventManagerWindow.caller$.role], entity:[$EventManagerWindow.entity$])
+            } else {
+                notification(['Error'],['Not allowed'],[500])
+            }
+        }
+    }
+
+    Button Back_B{
+        String text := ['Back']
+        event onClick{
+            back
+        }
+    }
+}

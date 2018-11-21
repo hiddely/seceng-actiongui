@@ -1,0 +1,100 @@
+role FREEUSER{
+    Person{
+        //1
+        read(name), read(surname), read(role), read(username)
+
+        //2
+        read(subscriptions)
+
+        //3
+        update(name), update(surname), update(password) constrainedBy [self = caller]
+
+        //4
+        add(subscriptions) constrainedBy [self = caller and 
+                                            self.subscriptions->size() < 3]
+
+        //5 (it may not be complete)
+        remove(subscriptions) constrainedBy [self = caller]
+
+        //6
+        read(attends)
+
+        //10
+        read(events)
+
+        //11
+        read(manages)
+        
+        
+    }
+    Event{
+        //12
+        read(title), read(description), read(location), read(time), read(date)
+
+        //13
+        read(owner), read(categories)
+        
+        //14
+        read(attendant) constrainedBy [self.attendants->includes(caller)]
+    }
+    Category{
+        //4 (may not be necessary)
+        add(subscribers) constrainedBy [value = caller]
+    }
+    Invite{
+        //8
+        read(event), read(invitedBy) constrainedBy [self.invitee = caller]
+    }
+}
+
+role PREMIUMUSER extends FREEUSER{
+    Person{
+        fullAccess
+    }
+    Event{
+        fullAccess
+    }
+    Category {
+        fullAccess
+    }
+    Invite{
+        fullAccess
+    }
+}
+role MODERATOR extends PREMIUMUSER{
+    Person{
+        fullAccess
+    }
+    Event{
+        fullAccess
+    }
+    Category{
+        fullAccess
+    }
+    Invite{
+        fullAccess
+    }
+}
+role ADMIN extends MODERATOR{
+    Person{
+        fullAccess
+    }
+    Event{
+        fullAccess
+    }
+    Category{
+        fullAccess
+    }
+    Invite{
+        fullAccess
+    }
+}
+
+//Necessary for the login procedure. Do not change.
+role SYSTEM{
+    Person{
+        read(username)
+        read(password)
+        read(role)
+    }
+}

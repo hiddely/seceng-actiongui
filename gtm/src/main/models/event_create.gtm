@@ -1,0 +1,147 @@
+Window EventCreateWindow{
+
+    Label Title_L {
+        String text:= ['Title']
+    }
+    TextField Title_TF {
+        String text:= [null]
+        String error:= [null]
+    }
+    Label Description_L {
+        String text:= ['Description']
+    }
+    TextField Description_TF {
+        String text:= [null]
+        String error:= [null]
+
+    }
+    Label Location_L {
+        String text:= ['Location (latitude and longitude)']
+    }
+    TextField Lat_TF {
+        String text:= [null]
+        String error:= [null]
+
+    }
+    TextField Lon_TF {
+        String text:= [null]
+        String error:= [null]
+
+    }
+    Label Date_L {
+        String text:= ['Date']
+    }
+    DateField Date_DF {
+        LocalDateTime value:= [null]
+        String error:= [null]
+
+    }
+    Label Time_L {
+        String text:= ['Time (hours and minutes)']
+    }
+    TextField Hour_TF {
+        String text:= [null]
+        String error:= [null]
+
+    }
+    TextField Minute_TF {
+        String text:= [null]
+        String error:= [null]
+
+    }
+    Label Category_L {
+        String text:= ['Categories']
+    }
+    Table Table_Category_T{
+        Set(Category) rows := [Category.allInstances()]
+        Set(Category) selected  := [null]
+        String error:= [null]
+
+        columns {
+            ['Name'] : Label name {
+                event onView (text){
+                    try{
+                        text := [$Table_Category_T.row$.name]
+                    } catch (SecurityException){
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+    Button Create_B{
+        String text := ['Create']
+        event onClick{
+            if [(not $Title_TF.text$.oclIsUndefined()) and 
+                (not ($Title_TF.text$.size()=0)) and
+                (not $Description_TF.text$.oclIsUndefined()) and
+                (not ($Description_TF.text$.size()=0)) and
+                (not $Lat_TF.text$.oclIsUndefined()) and
+                (not ($Lat_TF.text$.size()=0)) and
+                (not $Lat_TF.text$.toReal().oclIsInvalid()) and
+                (not $Lon_TF.text$.oclIsUndefined()) and
+                (not ($Lon_TF.text$.size()=0)) and
+                (not $Lon_TF.text$.toReal().oclIsInvalid()) and
+                (not $Date_DF.value$.oclIsUndefined()) and
+                (not $Date_DF.value$.toLocalDate().oclIsInvalid()) and
+                (not $Hour_TF.text$.oclIsUndefined()) and
+                (not ($Hour_TF.text$.size()=0)) and
+                (not $Hour_TF.text$.toInteger().oclIsInvalid()) and
+                ($Hour_TF.text$.toInteger() >= 0) and 
+                ($Hour_TF.text$.toInteger() < 24) and
+                ($Minute_TF.text$.toInteger() >= 0) and 
+                ($Minute_TF.text$.toInteger() < 60) and
+                (not $Minute_TF.text$.oclIsUndefined()) and
+                (not ($Minute_TF.text$.size()=0)) and
+                (not $Minute_TF.text$.toInteger().oclIsInvalid()) and
+                (not $Table_Category_T.selected$->oclIsUndefined())  and
+                (not ($Table_Category_T.selected$->size() < 1))]{
+                try{
+                    
+
+                        newEvent := new Event
+                        [$EventCreateWindow.caller$.events]+=[$newEvent$]
+                        [$EventCreateWindow.caller$.manages]+=[$newEvent$]
+                        [$EventCreateWindow.caller$.attends]+=[$newEvent$]
+
+                        [$newEvent$.title]:=[$Title_TF.text$]
+                        [$newEvent$.description]:=[$Description_TF.text$]
+                        [$newEvent$.lat]:=[$Lat_TF.text$.toReal()]
+                        [$newEvent$.lon]:=[$Lon_TF.text$.toReal()]
+                        [$newEvent$.date]:=[$Date_DF.value$.toLocalDate()]
+                        [$newEvent$.hour]:=[$Hour_TF.text$.toInteger()]
+                        [$newEvent$.min]:=[$Minute_TF.text$.toInteger()]
+                        foreach cat in [$Table_Category_T.selected$]{
+                            [$newEvent$.categories]+=[$cat$]
+                        }
+                        
+                        notification(['Success'],['Event created'],[500])
+                        
+                        Title_TF.text:=[null]
+                        Description_TF.text:=[null]
+                        Lat_TF.text:=[null]
+                        Lon_TF.text:=[null]
+                        Date_DF.value:=[null]
+                        Hour_TF.text:=[null]
+                        Minute_TF.text:=[null]
+                        Table_Category_T.selected:=[null]
+                    
+                        back
+                   
+                } catch (SecurityException) {
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Form contains errors.'],[500])
+            }
+            
+        }
+    }
+    Button Back_B{
+        String text := ['Back']
+        event onClick{
+            back
+        }
+    } 
+
+}

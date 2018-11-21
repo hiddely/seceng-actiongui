@@ -1,0 +1,75 @@
+Window UserWindow{
+    Person entity
+    
+    Label Name_L {
+        String text:= ['Name:']
+    }
+    TextField Name_TF {
+        String text := [$UserWindow.entity$.name]
+    }
+    Label Surname_L {
+        String text:= ['Surname:']
+    }
+    TextField Surname_TF {
+        String text := [$UserWindow.entity$.surname]
+    }
+    Label Username_L {
+        String text:= ['Username:']
+    }
+    Label Entityusername_L {
+        String text := [$UserWindow.entity$.username]
+    }
+    Label Password_L {
+        String text:= ['Password:']
+    }
+    PasswordField Password_PF {
+        String text := [null]
+    }
+    Label Role_L {
+        String text:= ['Role:']
+    }
+    Label Entityrole_L {
+        String text := [$UserWindow.entity$.role.name()]
+    }
+   
+    Button Update_B{
+        String text := ['Update info']
+        event onClick{
+            if [(not $Name_TF.text$.oclIsUndefined()) and 
+                (not ($Name_TF.text$.size()=0)) and
+                (not $Surname_TF.text$.oclIsUndefined()) and 
+                (not ($Surname_TF.text$.size()=0))]{
+                try{
+                    
+                    [$UserWindow.entity$.name]:=[$Name_TF.text$]
+                    [$UserWindow.entity$.surname]:=[$Surname_TF.text$]
+                    if [(not $Password_PF.text$.oclIsUndefined()) and
+                        (not ($Password_PF.text$.size()=0))]{
+                        [$UserWindow.entity$.password]:=[$Password_PF.text$]
+                    }
+                    
+                    notification(['Success'],['User updated'],[500])
+                } catch (SecurityException){
+                    notification(['Error'],['Not allowed'],[500])
+                }
+            } else {
+                notification(['Error'],['Form invalid'],[500])
+            }  
+        }
+    }
+    Button Categories_B{
+        String text := [$UserWindow.entity$.name.concat("'s Subscriptions")]
+        event onClick{
+            open UserCategoryWindow(caller:[$UserWindow.caller$], role:[$UserWindow.caller$.role], entity:[$UserWindow.entity$])
+        }
+    }
+    
+    Button Back_B{
+        String text := ['Back']
+        event onClick{
+            back
+        }
+    }
+
+
+}
