@@ -110,30 +110,43 @@ role FREEUSER{
 
 role PREMIUMUSER extends FREEUSER{
     Person{
-        fullAccess
+        //fullAccess
     }
     Event{
-        fullAccess
+        //2
+        create
+
+        //3-1, 3-2
+        add(managedBy), remove(managedBy) constrainedBy [self.owner = caller and self.attendants->includes(target)]
+
+        //4
+        read(attendants)
+
+        //5
+        //Already implemented by FREEUSER check in FreeUser
     }
     Category {
-        fullAccess
+        //1
+        add(subscribers) constrainedBy [target = caller]
     }
     Invite{
-        fullAccess
+        //fullAccess
     }
 }
 role MODERATOR extends PREMIUMUSER{
     Person{
-        fullAccess
+        //1
+        read(moderates) constrainedBy [self = caller]
     }
     Event{
-        fullAccess
+        //2 TODO: TEST, does this conflict with edit definition above?
+        update(title), update(description) constrainedBy [self.categories->any(c|c.moderators->includes(caller)) <> null]
     }
     Category{
-        fullAccess
+        //fullAccess
     }
     Invite{
-        fullAccess
+        //fullAccess
     }
 }
 role ADMIN extends MODERATOR{
