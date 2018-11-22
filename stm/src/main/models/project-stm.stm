@@ -151,13 +151,27 @@ role MODERATOR extends PREMIUMUSER{
 }
 role ADMIN extends MODERATOR{
     Person{
-        fullAccess
+        //1
+        create
+
+        //2
+        update(name), update(surname), update(password), update(role)
     }
     Event{
         fullAccess
     }
     Category{
-        fullAccess
+        //3
+        create
+
+        //4
+        update(name)
+
+        //5
+        read(moderators)
+
+        //6
+        add(moderators), remove(moderators)
     }
     Invite{
         fullAccess
