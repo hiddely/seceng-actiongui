@@ -155,7 +155,7 @@ role ADMIN extends MODERATOR{
         create
 
         //2
-        update(name), update(surname), update(password), update(role)
+        update(name), update(surname), update(username), update(password), update(role)
     }
     Event{
         fullAccess
