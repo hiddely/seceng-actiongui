@@ -76,6 +76,9 @@ role FREEUSER{
         //(15-5), 22
         add(attendants) constrainedBy [self.managedBy->includes(caller)
                         and (self.owner.role <> Role::FREEUSER or (self.attendants->size() + self.invitations->size() < 4))]
+        
+        // Needed for premium-3, and to not have an error on the screen
+        read(managedBy) constrainedBy [self.managedBy->includes(caller)]
     }
     Category{
         //4 (may not be necessary)
@@ -102,9 +105,13 @@ role FREEUSER{
 
         //15-2
         create
-        update(event) constrainedBy [value.managedBy->includes(caller) and self.event = null]
+        update(event) constrainedBy [value.managedBy->includes(caller) and self.event = null and
+                (value.owner.role <> Role::FREEUSER or (value.attendants->size() + value.invitations->size() < 4))]
         update(invitedBy) constrainedBy [value = caller and self.invitedBy = null]
         update(invitee) constrainedBy [self.invitedBy = caller and self.invitee = null]
+
+        //15-2, needed to send invite
+        read(invitee) constrainedBy [self.event.managedBy->includes(caller)]
     }
 }
 

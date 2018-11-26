@@ -165,11 +165,12 @@ Window ManageEventWindow{
                     [$newInvite$.event] := [$ManageEventWindow.entity$]
                     [$newInvite$.invitedBy] := [$ManageEventWindow.caller$]
                     [$newInvite$.invitee] := [$Table_Inv_T.selected$]
-
-                    notification(['Success'],['Invitation sent'],[500])
-                    
+               
                     Table_Inv_T.rows := [null]
                     reevaluate Table_Inv_T.rows
+
+                    notification(['Success'],['Invitation sent'],[500])
+
                         
                 } catch (SecurityException){
                     notification(['Error'],['Not allowed'],[500])
