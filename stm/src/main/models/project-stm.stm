@@ -1,195 +1,72 @@
 role FREEUSER{
     Person{
-        //1
-        read(name), read(surname), read(role), read(username)
-
-        //2
-        read(subscriptions)
-
-        //3
-        update(name), update(surname), update(password) constrainedBy [self = caller]
-
-        //4
-        //add(subscriptions) constrainedBy [self = caller and 
-        //                                    self.subscriptions->size() < 3]
-
-        //5 (it may not be complete)
-        //remove(subscriptions) constrainedBy [self = caller]
-
-        //6
-        read(attends) constrainedBy [self = caller]
-
-        //7
-        remove(attends) constrainedBy [self = caller
-                                        and (not self.events->includes(target))]
-
-        //8
-        read(invitations) constrainedBy [self = caller]
-
-        //9, 21
-        add(attends) constrainedBy [self = caller
-                                    and (self.invitations->any(v1|v1.event = target) <> null
-                                        or target.owner = caller)]
-
-        //10
-        read(events) constrainedBy [self = caller]
-
-        //11
-        read(manages) constrainedBy [self = caller]
-
-        //16, 17
-        add(requests), read(requests) constrainedBy [self = caller]
-
-        //21
-        add(events) constrainedBy [self = caller and target.owner = null]
-        add(manages) constrainedBy [self = caller and target.owner = caller]
-        
+        fullAccess
     }
     Event{
-        //12
-        read(title), read(description), read(lat), read(lon), read(hour), read(min), read(date)
-
-        //13
-        read(owner), read(categories)
-        
-        //14
-        read(attendants) constrainedBy [self.attendants->includes(caller)]
-
-        //15-1
-        read(invitations) constrainedBy [self.managedBy->includes(caller)]
-        //15-3
-        add(categories), remove(categories) constrainedBy [self.managedBy->includes(caller)]
-        //15-4
-        update(title), update(description),
-        update(lat), update(lon), update(hour),
-        update(min), update(date) constrainedBy [self.managedBy->includes(caller)]
-        //15-5
-        read(requesters), remove(requesters) constrainedBy [self.managedBy->includes(caller)]
-
-        //16
-        //add(requesters) constrainedBy [target = caller]
-
-        //21
-        create constrainedBy [caller.events->size() < 5]
-        update(owner) constrainedBy [self.owner = null and caller = value]
-
-        //(15-5), 22
-        add(attendants) constrainedBy [self.managedBy->includes(caller)
-                        and (self.owner.role <> Role::FREEUSER or (self.attendants->size() + self.invitations->size() < 4))]
-        
-        // Needed for premium-3, and to not have an error on the screen
-        read(managedBy) constrainedBy [self.managedBy->includes(caller)]
+        fullAccess
     }
     Category{
-        //4 (may not be necessary)
-        add(subscribers) constrainedBy [target = caller and
-                                        caller.subscriptions->size() < 3]
-
-        //5
-        remove(subscribers) constrainedBy [target = caller]
-
-        //18,19
-        read(name), read(events)
-
-        //20
-        read(subscribers), read(moderators) constrainedBy [self.subscribers->includes(caller)]
-
-        
+        fullAccess
     }
     Invite{
-        //8
-        read(event), read(invitedBy) constrainedBy [self.invitee = caller]
-
-        //9
-        delete constrainedBy [self.invitee = caller]
-
-        //15-2
-        create
-        update(event) constrainedBy [value.managedBy->includes(caller) and self.event = null and
-                (value.owner.role <> Role::FREEUSER or (value.attendants->size() + value.invitations->size() < 4))]
-        update(invitedBy) constrainedBy [value = caller and self.invitedBy = null]
-        update(invitee) constrainedBy [self.invitedBy = caller and self.invitee = null]
-
-        //15-2, needed to send invite
-        read(invitee) constrainedBy [self.event.managedBy->includes(caller)]
+        fullAccess
     }
 }
 
-role PREMIUMUSER extends FREEUSER{
+role PREMIUMUSER{
     Person{
-        //fullAccess
+        fullAccess
     }
     Event{
-        //2
-        create
-
-        //3-1, 3-2
-        add(managedBy), remove(managedBy) constrainedBy [self.owner = caller and self.attendants->includes(target)]
-
-        //4
-        read(attendants)
-
-        //5
-        //Already implemented by FREEUSER check in FreeUser
+        fullAccess
     }
     Category {
-        //1
-        add(subscribers) constrainedBy [target = caller]
+        fullAccess
     }
     Invite{
-        //fullAccess
+        fullAccess
     }
 }
-role MODERATOR extends PREMIUMUSER{
+role MODERATOR{
     Person{
-        //1
-        read(moderates) constrainedBy [self = caller]
-    }
-    Event{
-        //2 TODO: TEST, does this conflict with edit definition above?
-        update(title), update(description) constrainedBy [self.categories->any(c|c.moderators->includes(caller)) <> null]
-    }
-    Category{
-        //fullAccess
-    }
-    Invite{
-        //fullAccess
-    }
-}
-role ADMIN extends MODERATOR{
-    Person{
-        //1
-        create
-
-        //2
-        update(name), update(surname), update(username), update(password), update(role)
+        fullAccess
     }
     Event{
         fullAccess
     }
     Category{
-        //3
-        create
-
-        //4
-        update(name)
-
-        //5
-        read(moderators)
-
-        //6
-        add(moderators), remove(moderators)
+        fullAccess
+    }
+    Invite{
+        fullAccess
+    }
+}
+role ADMIN{
+    Person{
+        fullAccess
+    }
+    Event{
+        fullAccess
+    }
+    Category{
+        fullAccess
     }
     Invite{
         fullAccess
     }
 }
 
-//Necessary for the login procedure. Do not change.
 role SYSTEM{
     Person{
-        read(username)
-        read(password)
-        read(role)
+        fullAccess
+    }
+    Event{
+        fullAccess
+    }
+    Category{
+        fullAccess
+    }
+    Invite{
+        fullAccess
     }
 }

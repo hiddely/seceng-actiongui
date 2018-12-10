@@ -89,7 +89,7 @@ Window EventManagerWindow{
                         [$newEvent$.description]:=[$Description_TF.text$]
                         [$newEvent$.lat]:=[$Lat_TF.text$.toReal()]
                         [$newEvent$.lon]:=[$Lon_TF.text$.toReal()]
-                        [$newEvent$.date]:=[$Date_DF.value$.toLocalDate().plusDays(1)]
+                        [$newEvent$.date]:=[$Date_DF.value$.toLocalDate()]
                         [$newEvent$.hour]:=[$Hour_TF.text$.toInteger()]
                         [$newEvent$.min]:=[$Minute_TF.text$.toInteger()]                        
 

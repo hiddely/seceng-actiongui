@@ -1,0 +1,108 @@
+Window EventQueryWindow{
+
+    Label Text1_L {
+        String text := ['Search for all events that I ']
+    }
+    ComboBox Events_CB {
+        //TODO: define all the options
+        //NOTE: 'Role' below added for compilation purposes
+        //      replace it with the appropriate type
+        Set(Role) rows := [Set{}]
+        Role selected  := [null]
+        Label times { 
+            event onView (text) {
+                try{
+                    //TODO: show each option
+                } catch (SecurityException){
+                    text := ['RESTRICTED']
+                }
+            }
+        }
+    }
+    Label Text2_L {
+        String text := ['where at least']
+    }
+    
+    TextField Param_TF{
+        String text := [null]
+    }
+
+    Label Text3_L {
+        String text := ['person/people from the following group']
+    }
+    Table Table_People_T{
+        //TODO: show all people
+        //NOTE: 'Role' below added for compilation purposes
+        //      replace it with the appropriate type
+        Set(Role) rows := [Set{}]
+        Set(Role) selected  := [null]
+        columns {
+            ['People'] : Label username {
+                event onView (text){
+                    try{
+                        //TODO: show each person (name contactinated with surname)
+                    } catch (SecurityException){
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+
+    Label Text4_L {
+        String text := ["is/are among the event's"]
+    }
+     
+    ComboBox Role_CB {
+        //TODO: define all the options
+        //NOTE: 'Role' below added for compilation purposes
+        //      replace it with the appropriate type
+        Set(Role) rows := [Set{}]
+        Role selected  := [null]
+        Label times { 
+            event onView (text) {
+                try{
+                    //TODO: show each option
+                } catch (SecurityException){
+                    text := ['RESTRICTED']
+                }
+            }
+        }
+    }
+    Button Search_B{
+        String text := ['Search']
+        event onClick{
+            //TODO: implement the query
+            notification(['Error'],['Not implemented'],[500])        
+        }
+    }
+
+    Label Text5_L {
+        String text := ['Results:']
+    }
+    Table Table_T{
+        //TODO: show the result of the query
+        //NOTE: 'Role' below added for compilation purposes
+        //      replace it with the appropriate type
+        Set(Role) rows := [Set{}]
+        columns {
+            ['Title'] : Label title {
+                event onView (text){
+                    try{
+                       //TODO: show the event title
+                    } catch (SecurityException){
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+
+
+    Button Back_B{
+        String text := ['Back']
+        event onClick{
+            back
+        }
+    }
+}

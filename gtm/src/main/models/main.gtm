@@ -11,6 +11,7 @@ Window MainWindow {
         Set(Invite) probe2
         event onClick{
             try{
+                //Reading probes (ensuring that tables in UserEventWindow can render data)
                 probe1:= [$MainWindow.caller$.events]
                 probe1:= [$MainWindow.caller$.attends]
                 probe2:= [$MainWindow.caller$.invitations]
@@ -37,6 +38,12 @@ Window MainWindow {
         String text:=['Users']
         event onClick{
             open UserListWindow(caller:[$MainWindow.caller$], role:[$MainWindow.caller$.role])
+        }
+    }
+    Button Query_B {
+        String text:=['Search events']
+        event onClick{
+            open EventQueryWindow(caller:[$MainWindow.caller$], role:[$MainWindow.caller$.role])
         }
     }
     

@@ -72,6 +72,7 @@ Window EventUserWindow{
         event onClick {
             try {
                 Table_Att_T.rows := [$EventUserWindow.entity$.attendants->collect(m|m.name.concat(' ').concat(m.surname))->asSet()]
+                //reevaluate Table_Att_T.rows
                 
             } catch(SecurityException){
                 notification(['Error'],['Not allowed'],[500])

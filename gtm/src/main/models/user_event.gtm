@@ -146,12 +146,16 @@ Window UserEventWindow{
         event onClick {
             if [ (not $Table_Att_T.selected$.oclIsUndefined())  ]{
                 try{
+                    //if [ not $UserEventWindow.entity$.events->includes($Table_Att_T.selected$)]{ 
                         [$UserEventWindow.entity$.attends] -= [$Table_Att_T.selected$]
                         
                         notification(['Success'],['You have left the event'],[500])
                         Table_Att_T.rows := [null]
                         reevaluate Table_Att_T.rows
-                    
+                        
+                    //} else {
+                    //    notification(['Error'],['Cannot leave events that you own or manage'],[500])
+                    //} 
                 } catch (SecurityException){
                     notification(['Error'],['Not allowed'],[500])
                 }

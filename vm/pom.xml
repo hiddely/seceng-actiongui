@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ch.ethz.inf</groupId>
-        <artifactId>CourseProject</artifactId>
+        <artifactId>CourseProjectExtended</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vm</artifactId>
     <packaging>war</packaging>
-    <name>CourseProjectTemplate VM</name>
+    <name>CourseProjectExtended VM</name>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

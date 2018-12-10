@@ -8,6 +8,7 @@ Window CategoryWindow{
         event onClick {
             try {
                 Table_Mods_T.rows := [$CategoryWindow.entity$.moderators->collect(m|m.name.concat(' ').concat(m.surname))->asSet()]
+                //reevaluate Table_Mods_T.rows
                 
             } catch(SecurityException){
                 notification(['Error'],['Not allowed'],[500])
@@ -118,6 +119,7 @@ Window CategoryWindow{
         event onClick {
             try {
                 Table_Subs_T.rows := [$CategoryWindow.entity$.subscribers->collect(m|m.name.concat(' ').concat(m.surname))->asSet()]
+                //reevaluate Table_Subs_T.rows
                 
             } catch(SecurityException){
                 notification(['Error'],['Not allowed'],[500])
