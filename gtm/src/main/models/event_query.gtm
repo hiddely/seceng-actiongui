@@ -1,5 +1,8 @@
 Window EventQueryWindow{
 
+    Set(Event) firstRestriction := [null]
+    Set(Event) secondRestriction := [null]
+
     Label Text1_L {
         String text := ['Search for all events that I ']
     }
@@ -7,12 +10,13 @@ Window EventQueryWindow{
         //TODO: define all the options
         //NOTE: 'Role' below added for compilation purposes
         //      replace it with the appropriate type
-        Set(Role) rows := [Set{}]
-        Role selected  := [null]
+        Set(String) rows := [Set{'am attending', 'was invited', 'requested to join'}]
+        String selected  := [null]
         Label times { 
             event onView (text) {
                 try{
                     //TODO: show each option
+                    text := [$Events_CB.row$]
                 } catch (SecurityException){
                     text := ['RESTRICTED']
                 }
@@ -34,13 +38,14 @@ Window EventQueryWindow{
         //TODO: show all people
         //NOTE: 'Role' below added for compilation purposes
         //      replace it with the appropriate type
-        Set(Role) rows := [Set{}]
-        Set(Role) selected  := [null]
+        Set(Person) rows := [Person.allInstances()]
+        Set(Person) selected  := [null]
         columns {
             ['People'] : Label username {
                 event onView (text){
                     try{
                         //TODO: show each person (name contactinated with surname)
+                        text := [$Table_People_T.row$.name + ' ' + $Table_People_T.row$.surname]
                     } catch (SecurityException){
                         text := ['RESTRICTED']
                     }
@@ -57,12 +62,13 @@ Window EventQueryWindow{
         //TODO: define all the options
         //NOTE: 'Role' below added for compilation purposes
         //      replace it with the appropriate type
-        Set(Role) rows := [Set{}]
-        Role selected  := [null]
+        Set(String) rows := [Set{'attendants', 'managers', 'owners'}]
+        String selected  := [null]
         Label times { 
             event onView (text) {
                 try{
                     //TODO: show each option
+                    text := [$Role_CB.row$]
                 } catch (SecurityException){
                     text := ['RESTRICTED']
                 }
@@ -71,9 +77,66 @@ Window EventQueryWindow{
     }
     Button Search_B{
         String text := ['Search']
+        Integer M := [null]
         event onClick{
             //TODO: implement the query
-            notification(['Error'],['Not implemented'],[500])        
+            // First combobox
+            if [$Events_CB.selected$ = null] {
+                EventQueryWindow.firstRestriction := [Event.allInstances()]
+            }
+            if [$Events_CB.selected$ = 'am attending'] {
+                EventQueryWindow.firstRestriction := [$EventQueryWindow.caller$.attends]
+            }
+            if [$Events_CB.selected$ = 'was invited'] {
+                EventQueryWindow.firstRestriction := [$EventQueryWindow.caller$.invitations.event->asSet()] 
+            }
+            if [$Events_CB.selected$ = 'requested to join'] {
+                EventQueryWindow.firstRestriction := [$EventQueryWindow.caller$.requests] 
+            }
+
+            // Second box
+            M := [$Param_TF.text$.toInteger()]
+            if [$Role_CB.selected$ = null] {
+                EventQueryWindow.secondRestriction := [Set{}] 
+                notification(['Error'],['Select the events group the users should belong to'],[500]) 
+                
+            } else {
+                if [$M$.oclIsUndefined() or $M$ < 0] {
+                    EventQueryWindow.secondRestriction := [Set{}] 
+                    notification(['Error'],['Number of users must be a positive number'],[500]) 
+                } else {
+                    if [$M$ < $Table_People_T.selected$->size()] {
+                        M := [$Table_People_T.selected$->size()]
+                    }
+                    if [$Role_CB.selected$ = 'attendants'] {
+                        EventQueryWindow.secondRestriction := [Event.allInstances()->select(v1|v1.attendants->union($Table_People_T.selected$)->size() >= $M$)] 
+                    }
+                    if [$Role_CB.selected$ = 'managers'] {
+                        EventQueryWindow.secondRestriction := [Event.allInstances()->select(v1|v1.managedBy->union($Table_People_T.selected$)->size() >= $M$)] 
+                    }
+                    if [$Role_CB.selected$ = 'owners'] {
+                        if [$M$ = 0] {
+                            // Include all events, since no one has to own them
+                            EventQueryWindow.secondRestriction := [Event.allInstances()]
+                        }
+                        if [$M$ = 1] {
+                            // Exactly one owner
+                            EventQueryWindow.secondRestriction := [$Table_People_T.selected$.events->asSet()]
+                        }
+                        if [$M$ > 1] {
+                            // Impossible
+                            EventQueryWindow.secondRestriction := [Set{}]
+                        }
+                        //EventQueryWindow.secondRestriction := [Event.allInstances()->select(v1|$Table_People_T.selected$->select(v2|v2.events->includes(v1) >= $Param_TF.text$->oclAsType(Integer))] 
+                    }
+                }
+                reevaluate Table_T.rows
+                
+            }
+            
+            //if [$Param_TF.text$ <> Int] {
+            //    notification(['Error'],['Please enter a numeric value for the amount of people'],[500]) 
+            //}
         }
     }
 
@@ -84,12 +147,13 @@ Window EventQueryWindow{
         //TODO: show the result of the query
         //NOTE: 'Role' below added for compilation purposes
         //      replace it with the appropriate type
-        Set(Role) rows := [Set{}]
+        Set(Event) rows := [$EventQueryWindow.secondRestriction$->intersection($EventQueryWindow.firstRestriction$)]
         columns {
             ['Title'] : Label title {
                 event onView (text){
                     try{
                        //TODO: show the event title
+                        text := [$Table_T.row$.title]
                     } catch (SecurityException){
                         text := ['RESTRICTED']
                     }
