@@ -99,39 +99,41 @@ Window EventQueryWindow{
             if [$Role_CB.selected$ = null] {
                 EventQueryWindow.secondRestriction := [Set{}] 
                 notification(['Error'],['Select the events group the users should belong to'],[500]) 
-                
-            } else {
-                if [$M$.oclIsUndefined() or $M$ < 0] {
-                    EventQueryWindow.secondRestriction := [Set{}] 
-                    notification(['Error'],['Number of users must be a positive number'],[500]) 
+            } else { 
+                if [$Table_People_T.selected$->size() = 0] {
+                    notification(['Error'],['Select at least one person from the table'],[500])
                 } else {
-                    if [$M$ < $Table_People_T.selected$->size()] {
-                        M := [$Table_People_T.selected$->size()]
-                    }
-                    if [$Role_CB.selected$ = 'attendants'] {
-                        EventQueryWindow.secondRestriction := [Event.allInstances()->select(v1|v1.attendants->union($Table_People_T.selected$)->size() >= $M$)] 
-                    }
-                    if [$Role_CB.selected$ = 'managers'] {
-                        EventQueryWindow.secondRestriction := [Event.allInstances()->select(v1|v1.managedBy->union($Table_People_T.selected$)->size() >= $M$)] 
-                    }
-                    if [$Role_CB.selected$ = 'owners'] {
-                        if [$M$ = 0] {
-                            // Include all events, since no one has to own them
-                            EventQueryWindow.secondRestriction := [Event.allInstances()]
+                    if [$M$.oclIsUndefined() or $M$ < 0] {
+                        EventQueryWindow.secondRestriction := [Set{}] 
+                        notification(['Error'],['Number of users must be a positive number'],[500]) 
+                    } else {
+                        if [$M$ < $Table_People_T.selected$->size()] {
+                            M := [$Table_People_T.selected$->size()]
                         }
-                        if [$M$ = 1] {
-                            // Exactly one owner
-                            EventQueryWindow.secondRestriction := [$Table_People_T.selected$.events->asSet()]
+                        if [$Role_CB.selected$ = 'attendants'] {
+                            EventQueryWindow.secondRestriction := [Event.allInstances()->select(v1|v1.attendants->intersection($Table_People_T.selected$)->size() >= $M$)] 
                         }
-                        if [$M$ > 1] {
-                            // Impossible
-                            EventQueryWindow.secondRestriction := [Set{}]
+                        if [$Role_CB.selected$ = 'managers'] {
+                            EventQueryWindow.secondRestriction := [Event.allInstances()->select(v1|v1.managedBy->intersection($Table_People_T.selected$)->size() >= $M$)] 
                         }
-                        //EventQueryWindow.secondRestriction := [Event.allInstances()->select(v1|$Table_People_T.selected$->select(v2|v2.events->includes(v1) >= $Param_TF.text$->oclAsType(Integer))] 
+                        if [$Role_CB.selected$ = 'owners'] {
+                            if [$M$ = 0] {
+                                // Include all events, since no one has to own them
+                                EventQueryWindow.secondRestriction := [Event.allInstances()]
+                            }
+                            if [$M$ = 1] {
+                                // Exactly one owner
+                                EventQueryWindow.secondRestriction := [$Table_People_T.selected$.events->asSet()]
+                            }
+                            if [$M$ > 1] {
+                                // Impossible
+                                EventQueryWindow.secondRestriction := [Set{}]
+                            }
+                            //EventQueryWindow.secondRestriction := [Event.allInstances()->select(v1|$Table_People_T.selected$->select(v2|v2.events->includes(v1) >= $Param_TF.text$->oclAsType(Integer))] 
+                        }
+                        reevaluate Table_T.rows
                     }
                 }
-                reevaluate Table_T.rows
-                
             }
             
             //if [$Param_TF.text$ <> Int] {
