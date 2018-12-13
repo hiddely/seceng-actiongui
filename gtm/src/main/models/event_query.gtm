@@ -107,7 +107,7 @@ Window EventQueryWindow{
                         EventQueryWindow.secondRestriction := [Set{}] 
                         notification(['Error'],['Number of users must be a positive number'],[500]) 
                     } else {
-                        if [$M$ < $Table_People_T.selected$->size()] {
+                        if [$M$ > $Table_People_T.selected$->size()] {
                             M := [$Table_People_T.selected$->size()]
                         }
                         if [$Role_CB.selected$ = 'attendants'] {
